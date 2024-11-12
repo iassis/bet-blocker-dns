@@ -1,0 +1,2 @@
+docker build -t unbound-dns .
+docker run -d --name unbound-dns -p <REPLACE_IP>:53:53/udp -p <REPLACE_IP>:53:53/tcp unbound-dns
