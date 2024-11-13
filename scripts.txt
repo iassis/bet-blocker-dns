@@ -1,2 +1,2 @@
 docker build -t unbound-dns .
-docker run -d --name unbound-dns -p 53:53/udp -p 53:53/tcp unbound-dns
+docker run -d --name unbound-dns -p 53:53/udp -p 53:53/tcp -p 853:853/udp -p 853:853/tcp -p 80:80 -e DOMAIN=betblock.andrealtoe.me -e EMAIL=email@email.com unbound-dns 

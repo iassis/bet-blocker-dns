@@ -51,10 +51,17 @@ sudo ss -tuln | grep :53
 sudo systemctl stop systemd-resolved
 ```
 
-5. Execute o container do Unbound:
+5. Execute o container do Unbound
+   5.1 Caso você não possua um domínio:
 
 ```sh
 docker run -d --name unbound-dns -p 53:53/udp -p 53:53/tcp unbound-dns
+```
+
+5.2 Caso você possua um domínio e queira utilizar o hostname
+
+```sh
+docker run -d --name unbound-dns -p 53:53/udp -p 53:53/tcp -p 853:853/udp -p 853:853/tcp -p 80:80 -e DOMAIN=<Seu dominio aqui> -e EMAIL=<Seu email aqui> unbound-dns
 ```
 
 ## Próximos Passos

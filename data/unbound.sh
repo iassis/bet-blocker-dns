@@ -3,6 +3,16 @@
 # Generate Unbound configuration from blocks.txt
 python3 /usr/local/bin/generate_unbound_conf.py
 
+# Check if DOMAIN and EMAIL environment variables are set
+if [[ -n "$DOMAIN" && -n "$EMAIL" ]]; then
+    apt-get -qq update && apt-get -qq --yes install certbot
+
+    # Obtain Let's Encrypt certificates using certbot
+    certbot certonly -n --standalone -d "$DOMAIN" --agree-tos --email "$EMAIL"
+else
+    echo "DOMAIN and EMAIL environment variables are not set. Skipping certificate generation."
+fi
+
 reserved=12582912
 availableMemory=$((1024 * $( (grep MemAvailable /proc/meminfo || grep MemTotal /proc/meminfo) | sed 's/[^0-9]//g' ) ))
 memoryLimit=$availableMemory
@@ -62,7 +72,7 @@ server:
     log-queries: no
     log-replies: no
     log-servfail: no
-    logfile: /dev/null
+    logfile: ""
     verbosity: 1
 
     ###########################################################################
@@ -141,6 +151,20 @@ server:
 remote-control:
     control-enable: no
 EOT
+
+    if [[ -n "$DOMAIN" && -n "$EMAIL" ]]; then
+        cat << EOT >> /opt/unbound/etc/unbound/unbound.conf
+        
+server:
+    ###########################################################################
+    # DNS over TLS
+    ###########################################################################
+    interface: 0.0.0.0@853
+    tls-service-key: "/etc/letsencrypt/live/$DOMAIN/privkey.pem"
+    tls-service-pem: "/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+    tls-port: 853
+EOT
+    fi
 fi
 
 mkdir -p /opt/unbound/etc/unbound/dev && \
